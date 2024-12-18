@@ -1,0 +1,7 @@
+# Ignore build artifacts
+/bin/
+/pkg/
+/vendor/
+
+# Ignore Go mod cache
+/go.sum
