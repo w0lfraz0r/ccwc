@@ -29,9 +29,14 @@ func main() {
         os.Exit(1)
     }
 
+    // Variables to hold counts
+    var byteCount, lineCount int
+    output := ""
+
     // Handle -c flag
     if *countBytes {
-        fmt.Printf("%8d %s\n", len(content), filename)
+        byteCount = len(content)
+        output += fmt.Sprintf("%8d ", byteCount)
     }
 
     // Handle -l flag
@@ -44,7 +49,6 @@ func main() {
         defer file.Close()
 
         scanner := bufio.NewScanner(file)
-        lineCount := 0
         for scanner.Scan() {
             lineCount++
         }
@@ -54,6 +58,12 @@ func main() {
             os.Exit(1)
         }
 
-        fmt.Printf("%8d %s\n", lineCount, filename)
+        output += fmt.Sprintf("%8d ", lineCount)
     }
+
+    output += filename
+    // Printing Results
+    if output != filename {
+		fmt.Println(output)
+	}
 }
