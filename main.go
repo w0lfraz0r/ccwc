@@ -33,53 +33,49 @@ func main() {
     }
 
     // Variables to hold counts
-    var byteCount, lineCount, wordCount, charCount int
-    output := ""
+    byteCount := len(content)
+    lineCount := 0
+    wordCount := 0
+    charCount := utf8.RuneCount(content)
 
-    // Handle -c flag
-    if *countBytes {
-        byteCount = len(content)
-        output += fmt.Sprintf("%8d ", byteCount)
+    // Calculate line count
+    file, err := os.Open(filename)
+    if err != nil {
+        fmt.Printf("Error opening file: %v\n", err)
+        os.Exit(1)
+    }
+    defer file.Close()
+
+    scanner := bufio.NewScanner(file)
+    for scanner.Scan() {
+        lineCount++
+    }
+    if err := scanner.Err(); err != nil {
+        fmt.Printf("Error reading file: %v\n", err)
+        os.Exit(1)
     }
 
-    // Handle -l flag
-    if *countLines {
-        file, err := os.Open(filename)
-        if err != nil {
-            fmt.Printf("Error opening file: %v\n", err)
-            os.Exit(1)
-        }
-        defer file.Close()
+    // Calculate word count
+    wordCount = len(strings.Fields(string(content)))
 
-        scanner := bufio.NewScanner(file)
-        for scanner.Scan() {
-            lineCount++
-        }
+    // Detect default output
+    defaultOutput := !(*countBytes || *countLines || *countWords || *countChars)
 
-        if err := scanner.Err(); err != nil {
-            fmt.Printf("Error reading file: %v\n", err)
-            os.Exit(1)
-        }
-
+    // Prepare output
+    output := ""
+    if *countLines || defaultOutput {
         output += fmt.Sprintf("%8d ", lineCount)
     }
-
-	// Handle -w flag
-    if *countWords {
-        words := strings.Fields(string(content))
-        wordCount = len(words)
+    if *countWords || defaultOutput {
         output += fmt.Sprintf("%8d ", wordCount)
     }
-
-    // Handle -m flag
+    if *countBytes || defaultOutput {
+        output += fmt.Sprintf("%8d ", byteCount)
+    }
     if *countChars {
-        charCount = utf8.RuneCount(content)
         output += fmt.Sprintf("%8d ", charCount)
     }
 
     output += filename
-    // Printing Results
-    if output != filename {
-		fmt.Println(output)
-	}
+    fmt.Println(output)
 }
