@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"unicode/utf8"
 )
 
 func main() {
@@ -13,6 +14,7 @@ func main() {
     countBytes := flag.Bool("c", false, "Count bytes in the file")
     countLines := flag.Bool("l", false, "Count newlines in the file")
     countWords := flag.Bool("w", false, "Count words in the file")
+    countChars := flag.Bool("m", false, "Count characters in the file")
 
 	flag.Parse()
 
@@ -31,7 +33,7 @@ func main() {
     }
 
     // Variables to hold counts
-    var byteCount, lineCount, wordCount int
+    var byteCount, lineCount, wordCount, charCount int
     output := ""
 
     // Handle -c flag
@@ -63,10 +65,16 @@ func main() {
     }
 
 	// Handle -w flag
-if *countWords {
+    if *countWords {
         words := strings.Fields(string(content))
         wordCount = len(words)
         output += fmt.Sprintf("%8d ", wordCount)
+    }
+
+    // Handle -m flag
+    if *countChars {
+        charCount = utf8.RuneCount(content)
+        output += fmt.Sprintf("%8d ", charCount)
     }
 
     output += filename
