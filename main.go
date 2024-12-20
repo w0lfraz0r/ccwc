@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 	"unicode/utf8"
 )
@@ -30,10 +31,10 @@ func main() {
             os.Exit(1)
         }
     } else {
-        filename = flag.Args()[0]
+        filename = filepath.Clean(flag.Args()[0])
         content, err = os.ReadFile(filename)
-		if err != nil {
-			fmt.Printf("Error reading file: %v\n", err)
+        if err != nil {
+            fmt.Printf("Error reading file: %v\n", err)
             os.Exit(1)
         }
     }
