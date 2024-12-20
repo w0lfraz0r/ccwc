@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 	"unicode/utf8"
@@ -16,20 +17,25 @@ func main() {
     countWords := flag.Bool("w", false, "Count words in the file")
     countChars := flag.Bool("m", false, "Count characters in the file")
 
-	flag.Parse()
+    flag.Parse()
 
-    // Check if a file is provided
+    // Read the file or standard input
+    var content []byte
+    var err error
+    var filename string
     if len(flag.Args()) == 0 {
-        fmt.Println("Usage: ccwc [OPTIONS] [FILE]")
-        os.Exit(1)
-    }
-
-    // Read the file
-    filename := flag.Args()[0]
-    content, err := os.ReadFile(filename)
-    if err != nil {
-        fmt.Printf("Error reading file: %v\n", err)
-        os.Exit(1)
+        content, err = ioutil.ReadAll(os.Stdin)
+        if err != nil {
+            fmt.Printf("Error reading standard input: %v\n", err)
+            os.Exit(1)
+        }
+    } else {
+        filename = flag.Args()[0]
+        content, err = os.ReadFile(filename)
+		if err != nil {
+			fmt.Printf("Error reading file: %v\n", err)
+            os.Exit(1)
+        }
     }
 
     // Variables to hold counts
@@ -39,20 +45,24 @@ func main() {
     charCount := utf8.RuneCount(content)
 
     // Calculate line count
-    file, err := os.Open(filename)
-    if err != nil {
-        fmt.Printf("Error opening file: %v\n", err)
-        os.Exit(1)
-    }
-    defer file.Close()
+    if filename != "" {
+        file, err := os.Open(filename)
+        if err != nil {
+            fmt.Printf("Error opening file: %v\n", err)
+            os.Exit(1)
+        }
+        defer file.Close()
 
-    scanner := bufio.NewScanner(file)
-    for scanner.Scan() {
-        lineCount++
-    }
-    if err := scanner.Err(); err != nil {
-        fmt.Printf("Error reading file: %v\n", err)
-        os.Exit(1)
+        scanner := bufio.NewScanner(file)
+        for scanner.Scan() {
+            lineCount++
+        }
+        if err := scanner.Err(); err != nil {
+            fmt.Printf("Error reading file: %v\n", err)
+            os.Exit(1)
+        }
+    } else {
+        lineCount = strings.Count(string(content), "\n")
     }
 
     // Calculate word count
@@ -76,6 +86,9 @@ func main() {
         output += fmt.Sprintf("%8d ", charCount)
     }
 
-    output += filename
+    // Print the results
+    if filename != "" {
+        output += filename
+    }
     fmt.Println(output)
 }
