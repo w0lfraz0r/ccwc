@@ -1,19 +1,20 @@
 package main
 
 import (
-    "fmt"
-    "flag"
-    "io/ioutil"
-    "os"
-    "bufio"
+	"bufio"
+	"flag"
+	"fmt"
+	"os"
+	"strings"
 )
 
 func main() {
     // Define command-line flags
     countBytes := flag.Bool("c", false, "Count bytes in the file")
     countLines := flag.Bool("l", false, "Count newlines in the file")
+    countWords := flag.Bool("w", false, "Count words in the file")
 
-    flag.Parse()
+	flag.Parse()
 
     // Check if a file is provided
     if len(flag.Args()) == 0 {
@@ -23,14 +24,14 @@ func main() {
 
     // Read the file
     filename := flag.Args()[0]
-    content, err := ioutil.ReadFile(filename)
+    content, err := os.ReadFile(filename)
     if err != nil {
         fmt.Printf("Error reading file: %v\n", err)
         os.Exit(1)
     }
 
     // Variables to hold counts
-    var byteCount, lineCount int
+    var byteCount, lineCount, wordCount int
     output := ""
 
     // Handle -c flag
@@ -54,11 +55,18 @@ func main() {
         }
 
         if err := scanner.Err(); err != nil {
-            fmt.Printf("Error reading file: &v\n", err)
+            fmt.Printf("Error reading file: %v\n", err)
             os.Exit(1)
         }
 
         output += fmt.Sprintf("%8d ", lineCount)
+    }
+
+	// Handle -w flag
+if *countWords {
+        words := strings.Fields(string(content))
+        wordCount = len(words)
+        output += fmt.Sprintf("%8d ", wordCount)
     }
 
     output += filename
